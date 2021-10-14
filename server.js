@@ -65,8 +65,8 @@ app.get('/list', function (요청, 응답) {
     db.collection('post').find().toArray(function(에러, 결과) {
 
         console.log(결과);
-        응답.render('list.ejs', {posts : 결과});  //posts 라는 이름으로 결과값을 담아서 list.ejs로 감
+        응답.render('list.ejs', {posts : 결과});  //posts 라는 이름으로 결과값을 담아서 list.ejs로 감 
     });
-
+    //수정
 });
 
