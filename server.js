@@ -7,7 +7,7 @@ app.set('view engine', 'ejs');
 var db;
 MongoClient.connect('mongodb+srv://admin:qwer1234@cluster0.gwbya.mongodb.net/todoapp?retryWrites=true&w=majority', function(에러, client) {
    
-    if(에러) return console.log(에러)
+    if(에러) return console.log(에러);
 
     db = client.db('todoapp');
 
