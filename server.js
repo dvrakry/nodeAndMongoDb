@@ -4,44 +4,40 @@ app.use(express.urlencoded({extended: true}));
 const MongoClient = require('mongodb').MongoClient;
 app.set('view engine', 'ejs');
 
-var db;
-MongoClient.connect('mongodb+srv://admin:qwer1234@cluster0.gwbya.mongodb.net/todoapp?retryWrites=true&w=majority', function(에러, client) {
-   
-    if(에러) return console.log(에러);
+app.set('/public', express.static('public'));
 
-    db = client.db('todoapp');
+var db;
+MongoClient.connect('mongodb+srv://admin:qwer1234@cluster0.gwbya.mongodb.net/todoapp?retryWrites=true&w=majority',
+ function(err, client) {
+   
+    if(err) return console.log(err);
+
+    db = client.db('todoapp'); //db명 todoapp
 
     app.listen(8080 , function(){
-        console.log('listening on 8080')
+        console.log('listening on 8080');
     });
 });
 
 
 
-app.get('/pet', function(req, res){
-    res.send('펫 용품을 쇼핑할수 있는 페이지 입니다.');
-});
 
-app.get('/beauty', function(req, res) {
-    res.send('미용 제품을 쇼핑할 수 있는 페이지 입니다.');   
-});
+// app.get('/', function(req, res) {
+//     res.sendFile(__dirname + '/index.html');  
+// });
 
-app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/index.html');  
-});
-
-app.get('/write', function(req, res) {
-    res.sendFile(__dirname + '/write.html');  
-});
+// app.get('/write', function(req, res) {
+//     res.sendFile(__dirname + '/write.html');  
+// });
 
 app.post('/add', function(요청, 응답){
     응답.send('전송완료');
 
     db.collection('counter').findOne({name : '게시물갯수'}, function (에러, 결과) {
         console.log(결과.totalPost);
-        var 총게시물갯수 = 결과.totalPost;
+        var count = 결과.totalPost;
 
-        db.collection('post').insertOne( { _id : 총게시물갯수 + 1 ,제목 : 요청.body.title, 날짜 : 요청.body.date } , function(){
+        db.collection('post').insertOne( { _id : count + 1 ,제목 : 요청.body.title, 날짜 : 요청.body.date } , function(){
             console.log('저장완료')
             
             // counter 라는 콜렉션에 있는 totalPost 라는 항목도 1 증가시켜야함
@@ -70,6 +66,15 @@ app.get('/list', function (요청, 응답) {
     //수정
 });
 
+app.get('/write', function (요청, 응답) {
+    응답.render('write.ejs');
+});
+
+app.get('/', function (요청, 응답) {
+    응답.render('index.ejs');
+});
+
+
 app.delete('/delete', function (요청, 응답) {
     console.log(요청.body);
     요청.body._id = parseInt(요청.body._id);
@@ -85,7 +90,6 @@ app.get('/detail/:id', function (요청, 응답) {
     db.collection('post').findOne({_id : parseInt(요청.params.id) }, function (에러, 결과) {
         console.log(결과);
         응답.render('detail.ejs', {data : 결과});
-
         })
     })
     
