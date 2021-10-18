@@ -70,3 +70,22 @@ app.get('/list', function (요청, 응답) {
     //수정
 });
 
+app.delete('/delete', function (요청, 응답) {
+    console.log(요청.body);
+    요청.body._id = parseInt(요청.body._id);
+    db.collection('post').deleteOne(요청.body, function (에러, 결과) {
+        console.log('삭제완료');
+        응답.status(200).send({ message : '성공했습니다.'});
+    });
+});
+
+// /detail로 접속하면 detail.ejs 보여줌
+
+app.get('/detail/:id', function (요청, 응답) {
+    db.collection('post').findOne({_id : parseInt(요청.params.id) }, function (에러, 결과) {
+        console.log(결과);
+        응답.render('detail.ejs', {data : 결과});
+
+        })
+    })
+    
