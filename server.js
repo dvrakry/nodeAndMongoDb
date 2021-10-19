@@ -6,6 +6,9 @@ app.set('view engine', 'ejs');
 
 app.set('/public', express.static('public'));
 
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
+
 var db;
 MongoClient.connect('mongodb+srv://admin:qwer1234@cluster0.gwbya.mongodb.net/todoapp?retryWrites=true&w=majority',
  function(err, client) {
@@ -93,3 +96,22 @@ app.get('/detail/:id', function (요청, 응답) {
         })
     })
     
+app.get('/edit/:id', function (요청, 응답) {
+    
+    db.collection('post').findOne({_id : parseInt(요청.params.id)}, function(에러, 결과) {
+        console.log(결과);
+        응답.render('edit.ejs', { editpost : 결과});
+    })
+    
+})
+
+app.put('/edit', function(요청, 응답) {
+    // 폼에 담긴 데이터들(제목,날짜)을 가지고 Db.collection 에다가
+    // 업데이트함
+
+    db.collection('post').updateOne({_id : parseInt(요청.body.id) },{ $set : {제목 : 요청.body.title , 날짜 : 요청.body.date }}, function (에러, 결과) {
+        console.log('수정완료');
+        응답.redirect('/list');
+
+    })
+})
