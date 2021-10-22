@@ -233,3 +233,53 @@ app.post('/add', function(요청, 응답){
         응답.status(200).send({ message : '성공했습니다.'});
     });
 });
+
+
+app.use('/shop', require('./routes/shop'));
+
+app.use('/board' ,require('./routes/shop2'));
+// //router 관리 연습 위한 예제
+
+// app.get('/shop/shirts', function(요청, 응답){
+//     응답.send('셔츠 파는 페이지입니다.');
+//  });
+ 
+//  app.get('/shop/pants', function(요청, 응답){
+//     응답.send('바지 파는 페이지입니다.');
+//  }); 
+
+//추가 연습 예제
+// app.get('/board/sub/sports', function(요청, 응답){
+//     응답.send('스포츠 게시판');
+//  });
+ 
+//  app.get('/board/sub/game', function(요청, 응답){
+//     응답.send('게임 게시판');
+//  }); 
+
+//이미지 업로드
+
+let multer = require('multer');
+var storage = multer.diskStorage({
+    destination : function (req, file, cb) {
+        cb(null, './public/image')
+    },
+    fiilname : function (req, file, cb) {
+        cb(null, file.originalname)
+    }
+});
+
+var upload = multer({storage : storage});
+
+
+app.get('/upload', function (요청, 응답) {
+    응답.render('upload.ejs');
+});
+
+app.post('/upload', upload.single('profile'), function (요청, 응답) {
+    응답.send('업로드완료')
+});
+
+app.get('/image/:imageName', function(요청, 응답){
+    응답.sendFile( __dirname + '/public/image/' + 요청.params.imageName )
+})
