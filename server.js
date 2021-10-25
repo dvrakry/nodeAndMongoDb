@@ -4,6 +4,10 @@ app.use(express.urlencoded({extended: true}));
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectId } = require('mongodb');
 
+const http = require('http').createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http);
+
 app.set('view engine', 'ejs');
 
 app.set('/public', express.static('public'));
@@ -19,9 +23,9 @@ MongoClient.connect('mongodb+srv://admin:qwer1234@cluster0.gwbya.mongodb.net/tod
 
     db = client.db('todoapp'); //db명 todoapp
 
-    app.listen(8080 , function(){
-        console.log('listening on 8080');
-    });
+    http.listen(8080, function () {
+        console.log('listening on 8080')
+      }); 
 });
 
 
@@ -303,7 +307,63 @@ app.get('/chat', 로그인했니, function(요청, 응답){
 
     db.collection('chatroom').find({ member : 요청.user._id }).toArray().then((결과)=>{
       console.log(결과);
-      응답.render('chat.ejs', {data : 결과})
+      응답.render('chat.ejs', {data : 결과});
     })
   
   }); 
+
+  app.post('/message', 로그인했니, function(요청, 응답) {
+      var 저장할거 = {
+          parent : 요청.body.parent,
+          content : 요청.body.content,
+          userid : 요청.user._id,
+          date : new Date(),
+      }
+
+      db.collection('message').insertOne(저장할거, function() {
+          console.log('DB저장 성공');
+          응답.send('디비저장성공')
+      })
+  })
+
+  app.get('/message/:parentid', 로그인했니, function(요청, 응답){
+
+    응답.writeHead(200, {
+      "Connection": "keep-alive",
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+    });
+  
+    db.collection('message').find({ parent: 요청.params.parentid }).toArray()
+    .then((결과)=>{
+      console.log(결과);
+      응답.write('event: test\n');
+      응답.write(`data: ${JSON.stringify(결과)}\n\n`);
+    });
+  
+  
+    const 찾을문서 = [
+      { $match: { 'fullDocument.parent': 요청.params.parentid } }
+    ];
+  
+    const changeStream = db.collection('message').watch(찾을문서);
+    changeStream.on('change', result => {
+      console.log(result.fullDocument);
+      var 추가된문서 = [result.fullDocument];
+      응답.write(`data: ${JSON.stringify(추가된문서)}\n\n`);
+    });
+  
+  });
+
+  app.get('/socket', function(요청,응답){
+    응답.render('socket.ejs')
+  });
+
+  io.on('connection', function(socket) {
+      console.log('접속됨');
+
+      socket.on('user-send', function(data) {
+          console.log(data);
+      })
+  })
+  
